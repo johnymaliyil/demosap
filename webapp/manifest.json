@@ -89,28 +89,28 @@
       "routes": [
         {
           "pattern": ":?query:",
-          "name": "WhsePhysInvtryDocList",
-          "target": "WhsePhysInvtryDocList"
+          "name": "WhsePhysicalInventoryItemList",
+          "target": "WhsePhysicalInventoryItemList"
         },
         {
-          "pattern": "WhsePhysInvtryDoc({key}):?query:",
-          "name": "WhsePhysInvtryDocObjectPage",
-          "target": "WhsePhysInvtryDocObjectPage"
+          "pattern": "WhsePhysicalInventoryItem({key}):?query:",
+          "name": "WhsePhysicalInventoryItemObjectPage",
+          "target": "WhsePhysicalInventoryItemObjectPage"
         }
       ],
       "targets": {
-        "WhsePhysInvtryDocList": {
+        "WhsePhysicalInventoryItemList": {
           "type": "Component",
-          "id": "WhsePhysInvtryDocList",
+          "id": "WhsePhysicalInventoryItemList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "entitySet": "WhsePhysInvtryDoc",
+              "entitySet": "WhsePhysicalInventoryItem",
               "variantManagement": "Page",
               "navigation": {
-                "WhsePhysInvtryDoc": {
+                "WhsePhysicalInventoryItem": {
                   "detail": {
-                    "route": "WhsePhysInvtryDocObjectPage"
+                    "route": "WhsePhysicalInventoryItemObjectPage"
                   }
                 }
               },
@@ -124,13 +124,13 @@
             }
           }
         },
-        "WhsePhysInvtryDocObjectPage": {
+        "WhsePhysicalInventoryItemObjectPage": {
           "type": "Component",
-          "id": "WhsePhysInvtryDocObjectPage",
+          "id": "WhsePhysicalInventoryItemObjectPage",
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
-              "entitySet": "WhsePhysInvtryDoc",
+              "entitySet": "WhsePhysicalInventoryItem",
               "editableHeaderContent": false
             }
           }
