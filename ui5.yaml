@@ -1,4 +1,4 @@
-specVersion: "3.1"
+specVersion: "4.0"
 metadata:
   name: physicalinventory
 type: application
@@ -7,22 +7,27 @@ server:
     - name: fiori-tools-proxy
       afterMiddleware: compression
       configuration:
-        ignoreCertError: false
+        ignoreCertErrors: true
+        backend:
+          - path: /sap
+            # Your real BTP destination (via Cloud Connector) exposing the
+            # on-prem S/4HANA system.
+            destination: dw4-bas
+            client: "100"
+            # If running outside BAS with direct network access instead,
+            # remove "destination" and use a direct URL:
+            # url: https://<your-s4hana-host>:<port>
         ui5:
           path:
             - /resources
             - /test-resources
           url: https://ui5.sap.com
-        backend:
-          - path: /sap
-            # In BAS via Cloud Connector: reference the BTP destination that
-            # exposes your on-prem S/4HANA system (created in your BTP
-            # subaccount, using the Cloud Connector virtual host/port).
-            destination: EWM_ON_PREM
-            client: "100"
-            # If running outside BAS with direct network access instead,
-            # remove "destination" and use a direct URL:
-            # url: https://<your-s4hana-host>:<port>
+          # Pin this to the UI5 version your system's Gateway/front-end
+          # server actually ships, if you know it (check via
+          # /sap/bc/ui5_ui5/ui2/ushell/resources/sap-ui-version.json on your
+          # system, or ask Basis). Left unpinned = latest from the CDN,
+          # which may not match what's deployed on the box.
+          # version: 1.xxx.x
     - name: fiori-tools-appreload
       afterMiddleware: compression
       configuration:
@@ -33,3 +38,4 @@ server:
       afterMiddleware: fiori-tools-appreload
       configuration:
         component: physicalinventory
+        ui5Theme: sap_horizon

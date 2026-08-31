@@ -1,4 +1,4 @@
-specVersion: "3.1"
+specVersion: "4.0"
 metadata:
   name: physicalinventory
 type: application
@@ -14,7 +14,7 @@ builder:
         target:
           # Same destination as in ui5.yaml — the BTP destination (via Cloud
           # Connector) pointing at your on-prem S/4HANA system.
-          destination: EWM_ON_PREM
+          destination: dw4-bas
           client: "100"
           # If deploying outside BAS with direct network access instead,
           # remove "destination" and use a direct URL:
