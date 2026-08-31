@@ -1,19 +1,13 @@
 node_modules/
-target/
-_out/
-gen/
+dist/
+archive.zip
 
-.cdsrc-private.json
-default-*.json
-*.sqlite
+# Fiori tools deploy credentials / local overrides — never commit these
+.env
+.fioritoolsrc
 
-# MTA
-mta_archives/
-*_mta_build_tmp
-*.mtar
+# Auto-fetched real service metadata (may contain system-specific details)
+webapp/localService/metadata.xml
 
 # Other
 .DS_Store
-
-# @cap-js/cds-typer
-@cds-models

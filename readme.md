@@ -1,105 +1,126 @@
 # SAP EWM Physical Inventory Demo
 
-A demo app built with **SAP Fiori Elements** (List Report + Object Page) on top of
-**SAP Cloud Application Programming Model (CAP)**, consuming the standard SAP
-EWM API **`api_whse_physinvtryitem_2`** ("Warehouse Physical Inventory Item",
-part of communication scenario `SAP_COM_0378`).
+A **SAP Fiori Elements** app (List Report + Object Page) deployed directly
+into the ABAP UI5 repository of an S/4HANA system with embedded EWM,
+consuming the standard SAP EWM API **`api_whse_physinvtryitem_2`**
+("Warehouse Physical Inventory Item", communication scenario `SAP_COM_0378`)
+**locally, same-origin** — no middle tier, no CORS, no BTP destination at
+runtime.
 
 - List Report shows Physical Inventory **Documents** for a warehouse.
 - Drilling into a document opens an Object Page with its **Items**
   (storage bin, product, book quantity vs. counted quantity, counted flag).
 
+> This project was previously scaffolded as a CAP (Node.js) app proxying the
+> public API Business Hub sandbox. Since you have direct access to a real
+> S/4HANA 2023 Private Cloud system with EWM and the Fiori front-end server
+> on the same box, that middle tier has been removed — the app now talks to
+> your system's own OData service directly, which is the standard pattern
+> for this deployment topology.
+
 ## Project layout
 
-| Folder / file | Purpose |
+| Path | Purpose |
 |---|---|
-| `srv/external/API_WHSE_PHYSINVENTORY.cds` | Local mirror of the real SAP API's entities. **Placeholder** — regenerate from the real service once you have sandbox access (see below). |
-| `srv/service.cds` | `PhysicalInventoryService` — our CAP service, a thin read-only projection over the external API. |
-| `srv/annotations.cds` | Fiori UI annotations (`@UI.LineItem`, `@UI.HeaderInfo`, `@UI.Facets`) driving the Fiori Elements pages. |
-| `app/physicalinventory/` | The Fiori Elements app (`sap.fe.templates.ListReport` / `ObjectPage`). |
+| `webapp/manifest.json` | App descriptor. `mainService` points at the real local OData path; `annotation` data source references the local UI annotation file. |
+| `webapp/annotations/annotation.xml` | Fiori UI annotations (`UI.LineItem`, `UI.HeaderInfo`, `UI.Facets`). **Placeholder** — see "Before you start" below. |
+| `webapp/` (rest) | Standard Fiori Elements app files (`Component.js`, `index.html` for local preview, `i18n/`). |
+| `ui5.yaml` | Local dev server config — `fiori-tools-proxy` routes backend calls to your system through a BTP destination (via Cloud Connector). |
+| `ui5-deploy.yaml` | Deployment config for `deploy-to-abap` — pushes the built app into your ABAP system's UI5 repository. |
 
-This was verified locally: `cds compile` produces valid OData V4 EDMX with the
-UI annotations, and `cds watch` serves the service correctly. It has **not**
-been tested end-to-end against the real EWM API, since that requires your own
-SAP API Business Hub key (see below).
+Verified locally: `npx ui5 build` succeeds and produces a valid app bundle;
+`ui5-deploy.yaml`'s schema was validated with `fiori deploy --testMode`. It
+has **not** been tested against your real system — I have no network path to
+your on-prem landscape from here.
 
-## Prerequisites
+## Before you start: fix the placeholders
 
-1. An SAP BTP account (a free trial account is enough) with a
-   **Business Application Studio** *Full-Stack Cloud Application* dev space.
-2. A key for the **SAP API Business Hub** sandbox:
-   go to [api.sap.com](https://api.sap.com), sign in, open the
-   [Warehouse Physical Inventory Item API](https://api.sap.com/api/api_whse_physinvtryitem_2),
-   and copy your API key from the "Show API Key" button.
+Two things in this scaffold are best-effort guesses, not read from your
+system's real metadata:
 
-## Setup in Business Application Studio
+1. **`webapp/annotations/annotation.xml`** — the entity type names
+   (`WhsePhysInvtryDoc` / `WhsePhysInvtryItem`) and their fields are inferred
+   from the API's documentation, not fetched live. A mismatched `Target`
+   is silently ignored by UI5 (no error, columns just don't appear).
+2. **`webapp/manifest.json`** — entity *set* names in `routing` (also
+   `WhsePhysInvtryDoc`) are the same kind of guess.
 
-1. Clone this repo/branch into your dev space and run `npm install`.
-2. Get the exact live entity model instead of the hand-written placeholder:
+**Most reliable fix:** once you're in Business Application Studio with the
+destination below working, use **SAP Fiori tools → Open Application
+Generator**, point it at your system's `api_whse_physinvtryitem_2` service,
+and let it read the real `$metadata` to (re)generate `manifest.json` and the
+annotations. You can then port the column/facet choices from this scaffold's
+`annotation.xml` into what it generates. Alternatively, fetch
+`$metadata` yourself (browser or `curl` through the working proxy) and
+correct the names by hand.
+
+## Setup in Business Application Studio (via Cloud Connector)
+
+### 1. Expose the system to BTP
+
+1. In **SAP Cloud Connector**, add your S/4HANA system's host/port as an
+   accessible on-premise resource (a "virtual host" mapped to the internal
+   host), and assign the resource to the BTP subaccount your BAS dev space
+   runs in.
+2. In that BTP subaccount's cockpit, create a **destination** named
+   **`EWM_ON_PREM`** (this exact name is what `ui5.yaml` / `ui5-deploy.yaml`
+   already reference):
+   - URL: the virtual host from Cloud Connector
+   - Proxy Type: `OnPremise`
+   - Authentication: whatever your system requires for the Gateway user
+     (Basic, or Principal Propagation if you have that set up)
+   - Additional property: `sap-client` = your client (also set directly as
+     `client:` in the YAML files, so this is mostly belt-and-braces)
+
+### 2. Activate the OData service on the ABAP side
+
+The API is released by SAP but not necessarily active in `/IWFND/MAINT_SERVICE`
+by default. With a Basis/functional consultant (or yourself, if authorized):
+
+1. Activate communication scenario **`SAP_COM_0378`** (or activate the
+   `api_whse_physinvtryitem_2` service directly via `/IWFND/MAINT_SERVICE` /
+   `/n/IWFND/MAINT_SERVICE`, system alias pointing at the EWM/S4 system
+   itself since it's embedded).
+2. Confirm the ICF node under `/sap/opu/odata4/sap/api_whse_physinvtryitem_2`
+   is active in `SICF`.
+3. Make sure your Gateway/Fiori user has authorization for physical
+   inventory display (the relevant `S_SCWM_*` / API-specific auth objects).
+
+### 3. Run and preview
+
+```bash
+npm install
+npm start
+```
+
+This serves the app locally (through the `fiori-tools-proxy` → `EWM_ON_PREM`
+destination → Cloud Connector → your system) with live reload, and opens a
+Fiori Launchpad sandbox preview. This is also when you should fetch real
+`$metadata` and fix the placeholders above.
+
+## Deploying to your ABAP system
+
+1. Edit `ui5-deploy.yaml`:
+   - `app.name` — a valid BSP application name in your namespace (Z/Y
+     prefix, max 15 chars).
+   - `app.package` — an existing, transportable ABAP package (not `$TMP`).
+   - `app.transport` — a transport request, or leave `""` to be prompted.
+2. Deploy:
    ```bash
-   cds import API_WHSE_PHYSINVENTORY --as cds
+   npm run build
+   npm run deploy
    ```
-   Configuring credentials for this command is covered by option A below —
-   do this step after you've set up a working connection, then re-run it.
-
-### Option A — quick local run (start here)
-
-BAS dev spaces have outbound internet access, so you can call the sandbox
-directly without setting up a BTP destination first. Create a
-**git-ignored** `.cdsrc-private.json` in the project root:
-
-```json
-{
-  "requires": {
-    "API_WHSE_PHYSINVENTORY": {
-      "credentials": {
-        "url": "https://sandbox.api.sap.com/s4hanacloud/sap/opu/odata4/sap/api_whse_physinvtryitem_2/srvd_a2x/sap/whsephysicalinventorydoc/0001",
-        "headers": { "APIKey": "<your API Business Hub key>" }
-      }
-    }
-  }
-}
-```
-
-This overrides the `destination`-based config in `package.json` for local
-runs only. Then:
-
-```bash
-cds watch
-```
-
-Open the app at the printed URL, path `/physicalinventory/webapp/index.html`
-(or use the "Open Preview" link CAP prints for `PhysInvtryDocuments`).
-
-### Option B — BTP destination (for a "real" setup / deployment)
-
-1. In your BTP subaccount cockpit, create a destination named
-   **`EWM_API_SANDBOX`**:
-   - URL: `https://sandbox.api.sap.com`
-   - Authentication: `NoAuthentication`
-   - Additional property: `URL.headers.APIKey` = `<your API Business Hub key>`
-2. `package.json` already points `API_WHSE_PHYSINVENTORY` at this destination
-   name — no code change needed.
-3. For local/hybrid testing against it, bind the destination service to your
-   dev space and run `cds bind` (see the
-   [CAP docs on hybrid testing](https://cap.cloud.sap/docs/advanced/hybrid-testing)),
-   then `cds watch --profile hybrid`.
-4. This is also the setup you'd keep when deploying the app (`cds add mta`
-   + `cf deploy`), since it doesn't hard-code your API key anywhere.
-
-## Running
-
-```bash
-cds watch
-```
-
-- OData service: `http://localhost:4004/physical-inventory/`
-- Fiori app: `http://localhost:4004/physicalinventory/webapp/index.html`
-- CAP's built-in Fiori preview (no app build needed):
-  the index page CAP serves at `http://localhost:4004/` links to it directly.
+   This uploads the built app into the ABAP system's UI5 repository
+   (`/UI5/UI5_REPOSITORY_LOAD` under the hood) via the same `EWM_ON_PREM`
+   destination.
+3. **Register it in the Fiori Launchpad**: create (or reuse) a catalog and
+   group via the Launchpad Content Manager / `/UI2/FLPCM_CUST`, add a tile
+   for the deployed app (semantic object + action pointing at your BSP app),
+   and assign the catalog to the relevant PFCG role(s).
+4. To remove it later: `npm run undeploy`.
 
 ## Learn more
 
 - API details: [api.sap.com/api/api_whse_physinvtryitem_2](https://api.sap.com/api/api_whse_physinvtryitem_2)
-- CAP: <https://cap.cloud.sap>
+- SAP Fiori tools deploy-to-ABAP: search SAP Help Portal for "Deploying to an ABAP System"
 - Fiori Elements: <https://ui5.sap.com/#/topic/797c3239b1a5435693d0f75e34d99191>

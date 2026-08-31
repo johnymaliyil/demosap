@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Local UI annotations for the Fiori Elements List Report / Object Page.
+
+  PLACEHOLDER — the Target namespace below (com.sap.gateway.srvd_a2x.
+  api_whse_physinvtryitem_2.v0001) follows the standard SAP OData V4 naming
+  convention and matches the service's own OData path segments
+  (.../odata4/sap/api_whse_physinvtryitem_2/srvd_a2x/.../0001/), but the exact
+  EntityType names (WhsePhysInvtryDoc / WhsePhysInvtryItem) are our best
+  guess, not read from real $metadata. Before relying on this file:
+
+    1. Fetch the real metadata from your system, e.g.
+       GET https://<host>/sap/opu/odata4/sap/api_whse_physinvtryitem_2/srvd_a2x/sap/whsephysicalinventorydoc/0001/$metadata
+       (via BAS command "Fiori: Download OData Metadata", or once `npm start`
+       is proxying to your backend, open $metadata through the local proxy).
+    2. Confirm/fix the Namespace and EntityType names below against it.
+
+  A Target that doesn't match a real EntityType is silently ignored by UI5
+  (no error) — if List Report columns don't show up, check this first.
+-->
+<edmx:Edmx xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx" Version="4.0">
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/Common.xml">
+    <edmx:Include Alias="Common" Namespace="com.sap.vocabularies.Common.v1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://oasis-tcs.github.io/odata-vocabularies/vocabularies/Org.OData.Core.V1.xml">
+    <edmx:Include Alias="Core" Namespace="Org.OData.Core.V1"/>
+  </edmx:Reference>
+  <edmx:Reference Uri="https://sap.github.io/odata-vocabularies/vocabularies/UI.xml">
+    <edmx:Include Alias="UI" Namespace="com.sap.vocabularies.UI.v1"/>
+  </edmx:Reference>
+  <edmx:DataServices>
+    <Schema Namespace="local.annotations" xmlns="http://docs.oasis-open.org/odata/ns/edm">
+
+      <Annotations Target="com.sap.gateway.srvd_a2x.api_whse_physinvtryitem_2.v0001.WhsePhysInvtryDoc">
+        <Annotation Term="UI.HeaderInfo">
+          <Record Type="UI.HeaderInfoType">
+            <PropertyValue Property="TypeName" String="Physical Inventory Document"/>
+            <PropertyValue Property="TypeNamePlural" String="Physical Inventory Documents"/>
+            <PropertyValue Property="Title">
+              <Record Type="UI.DataField">
+                <PropertyValue Property="Value" Path="PhysicalInventoryDocument"/>
+              </Record>
+            </PropertyValue>
+            <PropertyValue Property="Description">
+              <Record Type="UI.DataField">
+                <PropertyValue Property="Value" Path="Warehouse"/>
+              </Record>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.SelectionFields">
+          <Collection>
+            <PropertyPath>Warehouse</PropertyPath>
+            <PropertyPath>PhysInventoryDocIsCounted</PropertyPath>
+          </Collection>
+        </Annotation>
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="Warehouse"/>
+              <PropertyValue Property="Label" String="Warehouse"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="PhysicalInventoryDocument"/>
+              <PropertyValue Property="Label" String="Document"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="PhysInventoryCountDate"/>
+              <PropertyValue Property="Label" String="Count Date"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="PhysInventoryDocIsCounted"/>
+              <PropertyValue Property="Label" String="Counted"/>
+            </Record>
+          </Collection>
+        </Annotation>
+        <Annotation Term="UI.Facets">
+          <Collection>
+            <Record Type="UI.ReferenceFacet">
+              <PropertyValue Property="Label" String="Items"/>
+              <PropertyValue Property="Target" AnnotationPath="to_Item/@UI.LineItem"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+      <Annotations Target="com.sap.gateway.srvd_a2x.api_whse_physinvtryitem_2.v0001.WhsePhysInvtryItem">
+        <Annotation Term="UI.HeaderInfo">
+          <Record Type="UI.HeaderInfoType">
+            <PropertyValue Property="TypeName" String="Physical Inventory Item"/>
+            <PropertyValue Property="TypeNamePlural" String="Physical Inventory Items"/>
+            <PropertyValue Property="Title">
+              <Record Type="UI.DataField">
+                <PropertyValue Property="Value" Path="Product"/>
+              </Record>
+            </PropertyValue>
+          </Record>
+        </Annotation>
+        <Annotation Term="UI.LineItem">
+          <Collection>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="PhysicalInventoryItem"/>
+              <PropertyValue Property="Label" String="Item"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="StorageBin"/>
+              <PropertyValue Property="Label" String="Storage Bin"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="Product"/>
+              <PropertyValue Property="Label" String="Product"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="StockType"/>
+              <PropertyValue Property="Label" String="Stock Type"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="BookQuantity"/>
+              <PropertyValue Property="Label" String="Book Qty"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="CountedQuantity"/>
+              <PropertyValue Property="Label" String="Counted Qty"/>
+            </Record>
+            <Record Type="UI.DataField">
+              <PropertyValue Property="Value" Path="PhysInventoryItemIsCounted"/>
+              <PropertyValue Property="Label" String="Counted"/>
+            </Record>
+          </Collection>
+        </Annotation>
+      </Annotations>
+
+    </Schema>
+  </edmx:DataServices>
+</edmx:Edmx>

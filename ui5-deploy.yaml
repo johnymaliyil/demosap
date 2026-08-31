@@ -1,0 +1,32 @@
+specVersion: "3.1"
+metadata:
+  name: physicalinventory
+type: application
+builder:
+  resources:
+    excludes:
+      - "/test/**"
+      - "/localService/**"
+  customTasks:
+    - name: deploy-to-abap
+      afterTask: generateCachebusterInfo
+      configuration:
+        target:
+          # Same destination as in ui5.yaml — the BTP destination (via Cloud
+          # Connector) pointing at your on-prem S/4HANA system.
+          destination: EWM_ON_PREM
+          client: "100"
+          # If deploying outside BAS with direct network access instead,
+          # remove "destination" and use a direct URL:
+          # url: https://<your-s4hana-host>:<port>
+        app:
+          # BSP application name in the ABAP UI5 repository — must respect
+          # your system's customer namespace (e.g. Z_/Y_ prefix), max 15 chars.
+          name: ZDEMO_PHYSINV
+          description: EWM Physical Inventory demo
+          # ABAP package to deploy into (must exist; $TMP cannot be
+          # transported to other systems).
+          package: ZDEMO_EWM
+          # Transport request to record the deployment in. Leave empty to
+          # be prompted for one interactively during `npm run deploy`.
+          transport: ""

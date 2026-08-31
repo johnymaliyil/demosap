@@ -1,0 +1,35 @@
+specVersion: "3.1"
+metadata:
+  name: physicalinventory
+type: application
+server:
+  customMiddleware:
+    - name: fiori-tools-proxy
+      afterMiddleware: compression
+      configuration:
+        ignoreCertError: false
+        ui5:
+          path:
+            - /resources
+            - /test-resources
+          url: https://ui5.sap.com
+        backend:
+          - path: /sap
+            # In BAS via Cloud Connector: reference the BTP destination that
+            # exposes your on-prem S/4HANA system (created in your BTP
+            # subaccount, using the Cloud Connector virtual host/port).
+            destination: EWM_ON_PREM
+            client: "100"
+            # If running outside BAS with direct network access instead,
+            # remove "destination" and use a direct URL:
+            # url: https://<your-s4hana-host>:<port>
+    - name: fiori-tools-appreload
+      afterMiddleware: compression
+      configuration:
+        port: 35729
+        path: webapp
+        delay: 300
+    - name: fiori-tools-preview
+      afterMiddleware: fiori-tools-appreload
+      configuration:
+        component: physicalinventory

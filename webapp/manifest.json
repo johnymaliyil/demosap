@@ -17,11 +17,18 @@
     },
     "dataSources": {
       "mainService": {
-        "uri": "/physical-inventory/",
+        "uri": "/sap/opu/odata4/sap/api_whse_physinvtryitem_2/srvd_a2x/sap/whsephysicalinventorydoc/0001/",
         "type": "OData",
         "settings": {
-          "annotations": [],
+          "annotations": ["annotation"],
           "odataVersion": "4.0"
+        }
+      },
+      "annotation": {
+        "type": "ODataAnnotation",
+        "uri": "annotations/annotation.xml",
+        "settings": {
+          "localUri": "annotations/annotation.xml"
         }
       }
     }
@@ -82,28 +89,28 @@
       "routes": [
         {
           "pattern": ":?query:",
-          "name": "PhysInvtryDocumentsList",
-          "target": "PhysInvtryDocumentsList"
+          "name": "WhsePhysInvtryDocList",
+          "target": "WhsePhysInvtryDocList"
         },
         {
-          "pattern": "PhysInvtryDocuments({key}):?query:",
-          "name": "PhysInvtryDocumentsObjectPage",
-          "target": "PhysInvtryDocumentsObjectPage"
+          "pattern": "WhsePhysInvtryDoc({key}):?query:",
+          "name": "WhsePhysInvtryDocObjectPage",
+          "target": "WhsePhysInvtryDocObjectPage"
         }
       ],
       "targets": {
-        "PhysInvtryDocumentsList": {
+        "WhsePhysInvtryDocList": {
           "type": "Component",
-          "id": "PhysInvtryDocumentsList",
+          "id": "WhsePhysInvtryDocList",
           "name": "sap.fe.templates.ListReport",
           "options": {
             "settings": {
-              "entitySet": "PhysInvtryDocuments",
+              "entitySet": "WhsePhysInvtryDoc",
               "variantManagement": "Page",
               "navigation": {
-                "PhysInvtryDocuments": {
+                "WhsePhysInvtryDoc": {
                   "detail": {
-                    "route": "PhysInvtryDocumentsObjectPage"
+                    "route": "WhsePhysInvtryDocObjectPage"
                   }
                 }
               },
@@ -117,13 +124,13 @@
             }
           }
         },
-        "PhysInvtryDocumentsObjectPage": {
+        "WhsePhysInvtryDocObjectPage": {
           "type": "Component",
-          "id": "PhysInvtryDocumentsObjectPage",
+          "id": "WhsePhysInvtryDocObjectPage",
           "name": "sap.fe.templates.ObjectPage",
           "options": {
             "settings": {
-              "entitySet": "PhysInvtryDocuments",
+              "entitySet": "WhsePhysInvtryDoc",
               "editableHeaderContent": false
             }
           }
@@ -134,9 +141,5 @@
   "sap.fiori": {
     "registrationIds": [],
     "archeType": "transactional"
-  },
-  "sap.cloud": {
-    "public": true,
-    "service": "physicalinventory"
   }
 }
